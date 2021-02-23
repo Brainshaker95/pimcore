@@ -143,6 +143,13 @@ abstract class Editable extends Model\AbstractModel implements Model\Document\Ed
     }
 
     /**
+     * Return the data for direct output to the frontend, can also contain HTML code!
+     *
+     * @return string|void
+     */
+    abstract public function frontend();
+
+    /**
      * @param string $id
      * @param string $code
      *
@@ -467,7 +474,7 @@ abstract class Editable extends Model\AbstractModel implements Model\Document\Ed
     {
         $finalVars = [];
         $parentVars = parent::__sleep();
-        $blockedVars = ['editmode', 'parentBlockNames', 'document'];
+        $blockedVars = ['editmode', 'parentBlockNames', 'document', 'config'];
 
         foreach ($parentVars as $key) {
             if (!in_array($key, $blockedVars)) {
@@ -487,7 +494,7 @@ abstract class Editable extends Model\AbstractModel implements Model\Document\Ed
     /**
      * direct output to the frontend
      *
-     * @return string
+     * @return mixed
      */
     public function render()
     {
@@ -659,7 +666,7 @@ abstract class Editable extends Model\AbstractModel implements Model\Document\Ed
             }
         }
 
-        $editableName = self::buildTagName($name, $type, $blockState, $targetGroupEditableName);
+        $editableName = self::doBuildName($name, $type, $blockState, $targetGroupEditableName);
 
         $event = new EditableNameEvent($type, $name, $blockState, $editableName, $document);
         \Pimcore::getEventDispatcher()->dispatch($event, DocumentEvents::EDITABLE_NAME);
@@ -677,7 +684,7 @@ abstract class Editable extends Model\AbstractModel implements Model\Document\Ed
         return $editableName;
     }
 
-    private static function buildTagName(string $name, string $type, BlockState $blockState, string $targetGroupElementName = null): string
+    private static function doBuildName(string $name, string $type, BlockState $blockState, string $targetGroupElementName = null): string
     {
         if (!$blockState->hasBlocks()) {
             return $name;
@@ -751,7 +758,7 @@ abstract class Editable extends Model\AbstractModel implements Model\Document\Ed
      *
      * @throws \Exception
      */
-    public static function buildChildElementTagName(string $name, string $type, array $parentBlockNames, int $index): string
+    public static function buildChildEditableName(string $name, string $type, array $parentBlockNames, int $index): string
     {
         if (count($parentBlockNames) === 0) {
             throw new \Exception(sprintf(

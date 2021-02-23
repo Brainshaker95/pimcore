@@ -18,6 +18,7 @@ namespace Pimcore\Model\DataObject\ClassDefinition\Data;
 
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data\Geo\AbstractGeo;
+use Pimcore\Model\Element\ValidationException;
 
 class Geobounds extends AbstractGeo implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, EqualComparisonInterface
 {
@@ -56,13 +57,6 @@ class Geobounds extends AbstractGeo implements ResourcePersistenceAwareInterface
     ];
 
     /**
-     * Type for the generated phpdoc
-     *
-     * @var string
-     */
-    public $phpdocType = '\\Pimcore\\Model\\DataObject\\Data\\Geobounds';
-
-    /**
      * @see ResourcePersistenceAwareInterface::getDataForResource
      *
      * @param DataObject\Data\Geobounds $data
@@ -91,6 +85,30 @@ class Geobounds extends AbstractGeo implements ResourcePersistenceAwareInterface
     }
 
     /**
+     * Checks if data is valid for current data field
+     *
+     * @param mixed $data
+     * @param bool $omitMandatoryCheck
+     *
+     * @throws \Exception
+     */
+    public function checkValidity($data, $omitMandatoryCheck = false)
+    {
+        $isEmpty = true;
+
+        if ($data) {
+            if (!$data instanceof DataObject\Data\Geobounds) {
+                throw new ValidationException('Expected an instance of Geobounds');
+            }
+            $isEmpty = false;
+        }
+
+        if (!$omitMandatoryCheck && $this->getMandatory() && $isEmpty) {
+            throw new ValidationException('Empty mandatory field [ ' . $this->getName() . ' ]');
+        }
+    }
+
+    /**
      * @see ResourcePersistenceAwareInterface::getDataFromResource
      *
      * @param array $data
@@ -108,7 +126,9 @@ class Geobounds extends AbstractGeo implements ResourcePersistenceAwareInterface
             $geobounds = new DataObject\Data\Geobounds($ne, $sw);
 
             if (isset($params['owner'])) {
-                $geobounds->setOwner($params['owner'], $params['fieldname'], $params['language'] ?? null);
+                $geobounds->_setOwner($params['owner']);
+                $geobounds->_setOwnerFieldname($params['fieldname']);
+                $geobounds->_setOwnerLanguage($params['language'] ?? null);
             }
 
             return $geobounds;
@@ -348,5 +368,25 @@ class Geobounds extends AbstractGeo implements ResourcePersistenceAwareInterface
         }
 
         return true;
+    }
+
+    public function getParameterTypeDeclaration(): ?string
+    {
+        return '?\\' . DataObject\Data\Geobounds::class;
+    }
+
+    public function getReturnTypeDeclaration(): ?string
+    {
+        return '?\\' . DataObject\Data\Geobounds::class;
+    }
+
+    public function getPhpdocInputType(): ?string
+    {
+        return '\\' . DataObject\Data\Geobounds::class . '|null';
+    }
+
+    public function getPhpdocReturnType(): ?string
+    {
+        return '\\' . DataObject\Data\Geobounds::class . '|null';
     }
 }

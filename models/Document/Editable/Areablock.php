@@ -126,6 +126,16 @@ class Areablock extends Model\Document\Editable implements BlockInterface
         $this->end();
     }
 
+    /**
+     * @return \Generator
+     */
+    public function getIterator()
+    {
+        while ($this->loop()) {
+            yield $this->getCurrentIndex();
+        }
+    }
+
     public function loop()
     {
         $disabled = false;
@@ -439,7 +449,7 @@ class Areablock extends Model\Document\Editable implements BlockInterface
 
         if ($dialogConfig) {
             $editableRenderer = \Pimcore::getContainer()->get(EditableRenderer::class);
-            $this->outputEditmode('<template id="dialogBoxConfig-' . $dialogConfig->getId() . '">' . \json_encode($dialogConfig) . '</template>');
+            $this->outputEditmode('<template id="dialogBoxConfig-' . $dialogConfig->getId() . '">' . \htmlspecialchars(\json_encode($dialogConfig)) . '</template>');
             $this->renderDialogBoxEditables($dialogConfig->getItems(), $editableRenderer, $dialogConfig->getId());
         }
     }

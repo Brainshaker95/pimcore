@@ -214,9 +214,7 @@ class Service extends Model\Element\Service
                     if ($fieldDef[0] === 'preview') {
                         $data[$field] = self::getPreviewThumbnail($asset, ['treepreview' => true, 'width' => 108, 'height' => 70, 'frame' => true]);
                     } elseif ($fieldDef[0] === 'size') {
-                        /** @var Asset $asset */
-                        $filename = PIMCORE_ASSET_DIRECTORY . '/' . $asset->getRealFullPath();
-                        $size = @filesize($filename);
+                        $size = @filesize($asset->getFileSystemPath());
                         $data[$field] = formatBytes($size);
                     }
                 } else {
@@ -376,9 +374,9 @@ class Service extends Model\Element\Service
                 $instance = $loader->build($item['type']);
 
                 if ($mode == 'grid') {
-                    $transformedData = $instance->getDataFromListfolderGrid($item['data'], $item);
+                    $transformedData = $instance->getDataFromListfolderGrid($item['data'] ?? null, $item);
                 } else {
-                    $transformedData = $instance->getDataFromEditMode($item['data'], $item);
+                    $transformedData = $instance->getDataFromEditMode($item['data'] ?? null, $item);
                 }
 
                 $item['data'] = $transformedData;

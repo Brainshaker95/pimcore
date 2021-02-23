@@ -68,7 +68,7 @@ class Area extends Model\Document\Editable
     {
         $config = $this->getConfig();
 
-        // TODO inject area handler via DI when tags are built through container
+        // TODO inject area handler via DI when editables are built by container
         $editableHandler = \Pimcore::getContainer()->get(EditableHandler::class);
 
         // don't show disabled bricks
@@ -149,7 +149,7 @@ class Area extends Model\Document\Editable
         $parentBlockNames = $this->getParentBlockNames();
         $parentBlockNames[] = $this->getName();
 
-        $id = Model\Document\Editable::buildChildElementTagName($name, 'area', $parentBlockNames, 1);
+        $id = Model\Document\Editable::buildChildEditableName($name, 'area', $parentBlockNames, 1);
         $editable = $document->getEditable($id);
 
         if ($editable) {

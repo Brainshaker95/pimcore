@@ -14,7 +14,8 @@
 
 namespace Pimcore\Bundle\CoreBundle\DependencyInjection\Compiler;
 
-use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use Pimcore\Extension\Document\Areabrick\AreabrickInterface;
 use Pimcore\Extension\Document\Areabrick\AreabrickManager;
 use Pimcore\Extension\Document\Areabrick\Exception\ConfigurationException;
@@ -30,6 +31,16 @@ use Symfony\Component\Finder\Finder;
 
 class AreabrickPass implements CompilerPassInterface
 {
+    /**
+     * @var Inflector
+     */
+    private $inflector;
+
+    public function __construct()
+    {
+        $this->inflector = InflectorFactory::create()->build();
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -88,8 +99,8 @@ class AreabrickPass implements CompilerPassInterface
      *
      * Valid examples:
      *
-     *  - AppBundle\Document\Areabrick\Foo
-     *  - AppBundle\Document\Areabrick\Foo\Bar\Baz
+     *  - MyBundle\Document\Areabrick\Foo
+     *  - MyBundle\Document\Areabrick\Foo\Bar\Baz
      *
      * @param ContainerBuilder $container
      * @param Definition $areaManagerDefinition
@@ -105,6 +116,12 @@ class AreabrickPass implements CompilerPassInterface
         array $excludedClasses
     ) {
         $bundles = $container->getParameter('kernel.bundles_metadata');
+        //Find bricks from /src since AppBundle is removed
+        $bundles['App'] = [
+            'path' => PIMCORE_PROJECT_ROOT . '/src',
+            'namespace' => 'App',
+        ];
+
         foreach ($bundles as $bundleName => $bundleMetadata) {
             $bundleAreas = $this->findBundleBricks($container, $bundleName, $bundleMetadata, $excludedClasses);
 
@@ -256,7 +273,7 @@ class AreabrickPass implements CompilerPassInterface
      */
     protected function generateBrickId(\ReflectionClass $reflector)
     {
-        $id = Inflector::tableize($reflector->getShortName());
+        $id = $this->inflector->tableize($reflector->getShortName());
         $id = str_replace('_', '-', $id);
 
         return $id;
@@ -265,8 +282,8 @@ class AreabrickPass implements CompilerPassInterface
     /**
      * Generate service ID from bundle name and sub-namespace
      *
-     *  - AppBundle\Document\Areabrick\Foo         -> app.area.brick.foo
-     *  - AppBundle\Document\Areabrick\Foo\Bar\Baz -> app.area.brick.foo.bar.baz
+     *  - MyBundle\Document\Areabrick\Foo         -> my.area.brick.foo
+     *  - MyBundle\Document\Areabrick\Foo\Bar\Baz -> my.area.brick.foo.bar.baz
      *
      * @param string $bundleName
      * @param string $subNamespace
@@ -277,12 +294,12 @@ class AreabrickPass implements CompilerPassInterface
     protected function generateServiceId($bundleName, $subNamespace, $className)
     {
         $bundleName = str_replace('Bundle', '', $bundleName);
-        $bundleName = Inflector::tableize($bundleName);
+        $bundleName = $this->inflector->tableize($bundleName);
 
         if (!empty($subNamespace)) {
             $subNamespaceParts = [];
             foreach (explode('\\', $subNamespace) as $subNamespacePart) {
-                $subNamespaceParts[] = Inflector::tableize($subNamespacePart);
+                $subNamespaceParts[] = $this->inflector->tableize($subNamespacePart);
             }
 
             $subNamespace = implode('.', $subNamespaceParts) . '.';
@@ -290,7 +307,7 @@ class AreabrickPass implements CompilerPassInterface
             $subNamespace = '';
         }
 
-        $brickName = Inflector::tableize($className);
+        $brickName = $this->inflector->tableize($className);
 
         return sprintf('%s.area.brick.%s%s', $bundleName, $subNamespace, $brickName);
     }

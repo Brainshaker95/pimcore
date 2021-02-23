@@ -384,8 +384,7 @@ class NewsletterController extends DocumentControllerBase
     {
         $addressSourceAdapterName = $request->get('addressAdapterName');
         $adapterParams = json_decode($request->get('adapterParams'), true);
-
-        $serviceLocator = $this->get('pimcore.newsletter.address_source_adapter.factories');
+        $serviceLocator = \Pimcore::getContainer()->get('pimcore.newsletter.address_source_adapter.factories');
 
         if (!$serviceLocator->has($addressSourceAdapterName)) {
             $msg = sprintf(
@@ -426,7 +425,7 @@ class NewsletterController extends DocumentControllerBase
             ]);
         }
 
-        $serviceLocator = $this->get('pimcore.newsletter.address_source_adapter.factories');
+        $serviceLocator = \Pimcore::getContainer()->get('pimcore.newsletter.address_source_adapter.factories');
 
         if (!$serviceLocator->has($addressSourceAdapterName)) {
             return $this->adminJson([
@@ -444,8 +443,15 @@ class NewsletterController extends DocumentControllerBase
 
         $sendingContainer = $addressAdapter->getParamsForTestSending($testMailAddress);
 
-        $mail = Newsletter::prepareMail($document);
-        Newsletter::sendNewsletterDocumentBasedMail($mail, $sendingContainer);
+        try {
+            $mail = Newsletter::prepareMail($document);
+            Newsletter::sendNewsletterDocumentBasedMail($mail, $sendingContainer);
+        } catch (\Exception $e) {
+            return $this->adminJson([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return $this->adminJson(['success' => true]);
     }

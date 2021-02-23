@@ -21,7 +21,6 @@ use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Config\ConfigInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\IndexService\Config\FindologicConfigInterface;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\AbstractCategory;
 use Pimcore\Bundle\EcommerceFrameworkBundle\Model\IndexableInterface;
-use Zend\Paginator\Adapter\AdapterInterface;
 
 class DefaultFindologic implements ProductListInterface
 {
@@ -392,7 +391,7 @@ class DefaultFindologic implements ProductListInterface
                     $this->products[] = $product;
                 }
             } else {
-                $this->getLogger()->err(sprintf('object "%s" not found', $id));
+                $this->getLogger()->error(sprintf('object "%s" not found', $id));
             }
         }
 
@@ -860,7 +859,9 @@ class DefaultFindologic implements ProductListInterface
     /**
      * Return a fully configured Paginator Adapter from this method.
      *
-     * @return AdapterInterface
+     * @deprecated will be removed in Pimcore 10
+     *
+     * @return self
      */
     public function getPaginatorAdapter()
     {

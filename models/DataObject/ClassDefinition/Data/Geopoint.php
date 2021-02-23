@@ -18,6 +18,7 @@ namespace Pimcore\Model\DataObject\ClassDefinition\Data;
 
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data\Geo\AbstractGeo;
+use Pimcore\Model\Element\ValidationException;
 
 class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, EqualComparisonInterface
 {
@@ -50,13 +51,6 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
         'longitude' => 'double',
         'latitude' => 'double',
     ];
-
-    /**
-     * Type for the generated phpdoc
-     *
-     * @var string
-     */
-    public $phpdocType = '\\Pimcore\\Model\\DataObject\\Data\\Geopoint';
 
     /**
      * @see ResourcePersistenceAwareInterface::getDataForResource
@@ -97,7 +91,9 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
             $geopoint = new DataObject\Data\Geopoint($data[$this->getName() . '__longitude'], $data[$this->getName() . '__latitude']);
 
             if (isset($params['owner'])) {
-                $geopoint->setOwner($params['owner'], $params['fieldname'], $params['language'] ?? null);
+                $geopoint->_setOwner($params['owner']);
+                $geopoint->_setOwnerFieldname($params['fieldname']);
+                $geopoint->_setOwnerLanguage($params['language'] ?? null);
             }
 
             return $geopoint;
@@ -298,6 +294,30 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
     }
 
     /**
+     * Checks if data is valid for current data field
+     *
+     * @param mixed $data
+     * @param bool $omitMandatoryCheck
+     *
+     * @throws \Exception
+     */
+    public function checkValidity($data, $omitMandatoryCheck = false)
+    {
+        $isEmpty = true;
+
+        if ($data) {
+            if (!$data instanceof DataObject\Data\Geopoint) {
+                throw new ValidationException('Expected an instance of Geopoint');
+            }
+            $isEmpty = false;
+        }
+
+        if (!$omitMandatoryCheck && $this->getMandatory() && $isEmpty) {
+            throw new ValidationException('Empty mandatory field [ ' . $this->getName() . ' ]');
+        }
+    }
+
+    /**
      *
      * @param DataObject\Data\Geopoint|null $oldValue
      * @param DataObject\Data\Geopoint|null $newValue
@@ -317,5 +337,25 @@ class Geopoint extends AbstractGeo implements ResourcePersistenceAwareInterface,
 
         return (abs($oldValue->getLongitude() - $newValue->getLongitude()) < 0.000000000001)
             && (abs($oldValue->getLatitude() - $newValue->getLatitude()) < 0.000000000001);
+    }
+
+    public function getParameterTypeDeclaration(): ?string
+    {
+        return '?\\' . DataObject\Data\Geopoint::class;
+    }
+
+    public function getReturnTypeDeclaration(): ?string
+    {
+        return '?\\' . DataObject\Data\Geopoint::class;
+    }
+
+    public function getPhpdocInputType(): ?string
+    {
+        return '\\' . DataObject\Data\Geopoint::class . '|null';
+    }
+
+    public function getPhpdocReturnType(): ?string
+    {
+        return '\\' . DataObject\Data\Geopoint::class . '|null';
     }
 }

@@ -167,10 +167,10 @@ class Ghostscript extends Adapter
 
         // Adding permit-file-read flag to prevent issue with Ghostscript's SAFER mode which is enabled by default as of version 9.50.
         if (version_compare($this->getVersion(), '9.50', '>=')) {
-            $command .= " --permit-file-read='" . $this->path . "'";
+            $command .= ' --permit-file-read=' . escapeshellarg($this->path);
         }
 
-        $command .= " -c '(" . $this->path . ") (r) file runpdfbegin pdfpagecount = quit'";
+        $command .= " -c '(" . escapeshellcmd($this->path) . ") (r) file runpdfbegin pdfpagecount = quit'";
 
         return $command;
     }
@@ -185,7 +185,7 @@ class Ghostscript extends Adapter
     protected function getVersion()
     {
         if (is_null($this->version)) {
-            $this->version = Console::exec(self::getGhostscriptCli() . ' --version');
+            $this->version = trim(Console::exec(self::getGhostscriptCli() . ' --version'));
         }
 
         return $this->version;

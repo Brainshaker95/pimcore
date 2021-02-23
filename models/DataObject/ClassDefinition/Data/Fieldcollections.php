@@ -23,21 +23,12 @@ use Pimcore\Model\DataObject\ClassDefinition\Data;
 
 class Fieldcollections extends Data implements CustomResourcePersistingInterface, LazyLoadingSupportInterface, TypeDeclarationSupportInterface
 {
-    use DataObject\ClassDefinition\NullablePhpdocReturnTypeTrait;
-
     /**
      * Static type of this element
      *
      * @var string
      */
     public $fieldtype = 'fieldcollections';
-
-    /**
-     * Type for the generated phpdoc
-     *
-     * @var string
-     */
-    public $phpdocType = '\\Pimcore\\Model\\DataObject\\Fieldcollection';
 
     /**
      * @var array
@@ -57,9 +48,12 @@ class Fieldcollections extends Data implements CustomResourcePersistingInterface
     /**
      * @var bool
      */
-    public $disallowAddRemove;
+    public $disallowAddRemove = false;
 
-    public $disallowReorder;
+    /**
+     * @var bool
+     */
+    public $disallowReorder = false;
 
     /**
      * @var bool
@@ -663,18 +657,6 @@ class Fieldcollections extends Data implements CustomResourcePersistingInterface
     }
 
     /**
-     * @param array $data
-     * @param DataObject\Concrete $object
-     * @param array $params
-     *
-     * @return mixed
-     */
-    public function getDiffDataFromEditmode($data, $object = null, $params = [])
-    {
-        return parent::getDiffDataFromEditmode($data, $object, $params);
-    }
-
-    /**
      * Rewrites id from source to target, $idMapping contains
      * array(
      *  "document" => array(
@@ -863,5 +845,25 @@ class Fieldcollections extends Data implements CustomResourcePersistingInterface
     public function supportsInheritance()
     {
         return false;
+    }
+
+    public function getParameterTypeDeclaration(): ?string
+    {
+        return '?\\' . DataObject\Fieldcollection::class;
+    }
+
+    public function getReturnTypeDeclaration(): ?string
+    {
+        return '?\\' . DataObject\Fieldcollection::class;
+    }
+
+    public function getPhpdocInputType(): ?string
+    {
+        return '\\' . DataObject\Fieldcollection::class . '|null';
+    }
+
+    public function getPhpdocReturnType(): ?string
+    {
+        return '\\' . DataObject\Fieldcollection::class . '|null';
     }
 }

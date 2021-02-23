@@ -33,13 +33,6 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface, Ty
     public $fieldtype = 'objectbricks';
 
     /**
-     * Type for the generated phpdoc
-     *
-     * @var string
-     */
-    public $phpdocType = '\\' . Objectbrick::class;
-
-    /**
      * @var array
      */
     public $allowedTypes = [];
@@ -139,6 +132,11 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface, Ty
         if ($object) {
             $parent = DataObject\Service::hasInheritableParentObject($object);
         }
+
+        if (!method_exists($data, $getter)) {
+            return null;
+        }
+
         /** @var DataObject\Objectbrick\Definition $item */
         $item = $data->$getter();
         if (!$item && !empty($parent)) {
@@ -227,7 +225,7 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface, Ty
             && !$fielddefinition instanceof Block) {
 
             //lazy loading data is fetched from DB differently, so that not every relation object is instantiated
-            if ($fielddefinition instanceof ReverseManyToManyObjectRelation) {
+            if ($fielddefinition instanceof ReverseObjectRelation) {
                 $refKey = $fielddefinition->getOwnerFieldName();
                 $refId = $fielddefinition->getOwnerClassId();
             } else {
@@ -235,7 +233,7 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface, Ty
                 $refId = null;
             }
 
-            $relations = $item->getRelationData($refKey, !$fielddefinition instanceof ReverseManyToManyObjectRelation, $refId);
+            $relations = $item->getRelationData($refKey, !$fielddefinition instanceof ReverseObjectRelation, $refId);
             if (empty($relations) && !empty($parent)) {
                 $parentItem = $parent->{'get' . ucfirst($this->getName())}();
                 if (!empty($parentItem)) {
@@ -266,10 +264,10 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface, Ty
                 $editmodeValue = $fielddefinition->getDataForEditmode($fieldValue, $baseObject, $params);
             }
             if ($fielddefinition->isEmpty($fieldValue) && !empty($parent)) {
-                $backup = DataObject\AbstractObject::getGetInheritedValues();
-                DataObject\AbstractObject::setGetInheritedValues(true);
+                $backup = DataObject::getGetInheritedValues();
+                DataObject::setGetInheritedValues(true);
                 $parentItem = $parent->{'get' . ucfirst($this->getName())}()->$getter();
-                DataObject\AbstractObject::setGetInheritedValues($backup);
+                DataObject::setGetInheritedValues($backup);
                 if (!empty($parentItem)) {
                     return $this->getDataForField($parentItem, $key, $fielddefinition, $level + 1, $parent, $getter, $params);
                 }
@@ -354,6 +352,8 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface, Ty
      */
     public function getVersionPreview($data, $object = null, $params = [])
     {
+        // this is handled directly in the template
+        // /bundles/AdminBundle/Resources/views/Admin/DataObject/DataObject/previewVersion.html.twig
         return 'BRICKS';
     }
 
@@ -959,5 +959,25 @@ class Objectbricks extends Data implements CustomResourcePersistingInterface, Ty
                 }
             }
         }
+    }
+
+    public function getParameterTypeDeclaration(): ?string
+    {
+        return '?\\' . Objectbrick::class;
+    }
+
+    public function getReturnTypeDeclaration(): ?string
+    {
+        return '?\\' . Objectbrick::class;
+    }
+
+    public function getPhpdocInputType(): ?string
+    {
+        return '\\' . Objectbrick::class . '|null';
+    }
+
+    public function getPhpdocReturnType(): ?string
+    {
+        return '\\' . Objectbrick::class . '|null';
     }
 }

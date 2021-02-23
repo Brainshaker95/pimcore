@@ -125,7 +125,7 @@ class Tool
                 return [];
             }
 
-            $validLanguages = str_replace(' ', '', strval($config['valid_languages']));
+            $validLanguages = str_replace(' ', '', (string)$config['valid_languages']);
             $languages = explode(',', $validLanguages);
 
             if (!is_array($languages)) {
@@ -285,20 +285,6 @@ class Tool
     }
 
     /**
-     * @static
-     *
-     * @return array
-     */
-    public static function getRoutingDefaults()
-    {
-        $container = \Pimcore::getContainer();
-        $routingDefaults = $container->getParameter('pimcore.routing.defaults');
-        $routingDefaults['module'] = $routingDefaults['bundle'];
-
-        return $routingDefaults;
-    }
-
-    /**
      * @param Request|null $request
      *
      * @return null|Request
@@ -384,10 +370,10 @@ class Tool
             return false;
         }
 
-        $requestKeys = array_merge([
+        $requestKeys = array_merge(
             array_keys($request->query->all()),
-            array_keys($request->request->all()),
-        ]);
+            array_keys($request->request->all())
+        );
 
         // check for manually disabled ?pimcore_outputfilters_disabled=true
         if (array_key_exists('pimcore_outputfilters_disabled', $requestKeys) && \Pimcore::inDebugMode()) {
@@ -541,6 +527,16 @@ class Tool
                 if (isset($tmp['name'])) {
                     $tmp['showroot'] = !empty($tmp['showroot']);
 
+                    if (!is_array($tmp['classes'] ?? [])) {
+                        $flipArray = [];
+                        $tempClasses = explode(',', $tmp['classes']);
+
+                        foreach ($tempClasses as $tempClass) {
+                            $flipArray[$tempClass] = null;
+                        }
+                        $tmp['classes'] = $flipArray;
+                    }
+
                     if (!empty($tmp['hidden'])) {
                         continue;
                     }
@@ -556,16 +552,14 @@ class Tool
     /**
      * @param array|string|null $recipients
      * @param string|null $subject
-     * @param string|null $charset
      *
      * @return Mail
      *
      * @throws \Exception
      */
-    public static function getMail($recipients = null, $subject = null, $charset = null)
+    public static function getMail($recipients = null, $subject = null)
     {
         $mail = new Mail();
-        $mail->setCharset($charset);
 
         if ($recipients) {
             if (is_string($recipients)) {

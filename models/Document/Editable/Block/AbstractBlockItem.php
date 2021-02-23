@@ -48,7 +48,7 @@ abstract class AbstractBlockItem
      *
      * @return Document\Editable|null
      *
-     * @deprecated and will be removed in Pimcore 7. Use getEditable() instead.
+     * @deprecated and will be removed in Pimcore 10. Use getEditable() instead.
      */
     public function getElement(string $name)
     {
@@ -62,7 +62,7 @@ abstract class AbstractBlockItem
      */
     public function getEditable(string $name)
     {
-        $id = Document\Editable::buildChildElementTagName($name, $this->getItemType(), $this->parentBlockNames, $this->index);
+        $id = Document\Editable::buildChildEditableName($name, $this->getItemType(), $this->parentBlockNames, $this->index);
         $editable = $this->document->getEditable($id);
 
         if ($editable) {

@@ -18,6 +18,7 @@ namespace Pimcore\Model\DataObject\ClassDefinition\Data;
 
 use Pimcore\Model\DataObject;
 use Pimcore\Model\DataObject\ClassDefinition\Data\Geo\AbstractGeo;
+use Pimcore\Model\Element\ValidationException;
 use Pimcore\Tool\Serialize;
 
 class Geopolyline extends AbstractGeo implements ResourcePersistenceAwareInterface, QueryResourcePersistenceAwareInterface, EqualComparisonInterface
@@ -45,13 +46,6 @@ class Geopolyline extends AbstractGeo implements ResourcePersistenceAwareInterfa
      * @var string
      */
     public $columnType = 'longtext';
-
-    /**
-     * Type for the generated phpdoc
-     *
-     * @var string
-     */
-    public $phpdocType = 'array';
 
     /**
      * @see ResourcePersistenceAwareInterface::getDataForResource
@@ -93,6 +87,44 @@ class Geopolyline extends AbstractGeo implements ResourcePersistenceAwareInterfa
     public function getDataForQueryResource($data, $object = null, $params = [])
     {
         return $this->getDataForResource($data, $object, $params);
+    }
+
+    /**
+     * Checks if data is valid for current data field
+     *
+     * @param mixed $data
+     * @param bool $omitMandatoryCheck
+     *
+     * @throws \Exception
+     */
+    public function checkValidity($data, $omitMandatoryCheck = false)
+    {
+        $isEmpty = true;
+
+        if ($data) {
+            $valid = true;
+
+            if (!is_array($data)) {
+                $valid = false;
+            } else {
+                foreach ($data as $point) {
+                    if (!$point instanceof DataObject\Data\Geopoint) {
+                        $valid = false;
+                        break;
+                    }
+                }
+            }
+
+            if (!$valid) {
+                throw new ValidationException('Expected an array of Geopoint');
+            }
+
+            $isEmpty = false;
+        }
+
+        if (!$omitMandatoryCheck && $this->getMandatory() && $isEmpty) {
+            throw new ValidationException('Empty mandatory field [ ' . $this->getName() . ' ]');
+        }
     }
 
     /**
@@ -336,5 +368,25 @@ class Geopolyline extends AbstractGeo implements ResourcePersistenceAwareInterfa
         }
 
         return true;
+    }
+
+    public function getParameterTypeDeclaration(): ?string
+    {
+        return '?array';
+    }
+
+    public function getReturnTypeDeclaration(): ?string
+    {
+        return '?array';
+    }
+
+    public function getPhpdocInputType(): ?string
+    {
+        return 'array|null';
+    }
+
+    public function getPhpdocReturnType(): ?string
+    {
+        return 'array|null';
     }
 }

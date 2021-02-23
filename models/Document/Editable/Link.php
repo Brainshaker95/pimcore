@@ -249,7 +249,7 @@ class Link extends Model\Document\Editable
         $url = $this->data['path'] ?? '';
 
         if (strlen($this->data['parameters'] ?? '') > 0) {
-            $url .= '?'.str_replace('?', '', $this->getParameters());
+            $url .= (strpos($url, '?') !== false ? '&' : '?') . str_replace('?', '', $this->getParameters());
         }
 
         if (strlen($this->data['anchor'] ?? '') > 0) {
@@ -308,6 +308,12 @@ class Link extends Model\Document\Editable
                     }
                 }
             }
+        }
+
+        // deletes unnecessary attribute, which was set by mistake in earlier versions, see also
+        // https://github.com/pimcore/pimcore/issues/7394
+        if (isset($this->data['type'])) {
+            unset($this->data['type']);
         }
     }
 
@@ -490,7 +496,7 @@ class Link extends Model\Document\Editable
         $isInternal = $this->data['internal'] ?? false;
 
         if (is_array($this->data) && $isInternal) {
-            if (intval($this->data['internalId']) > 0) {
+            if ((int)$this->data['internalId'] > 0) {
                 if ($this->data['internalType'] == 'document') {
                     if ($doc = Document::getById($this->data['internalId'])) {
                         $key = 'document_'.$doc->getId();

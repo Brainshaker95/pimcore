@@ -923,6 +923,9 @@ pimcore.document.editables.areablock = Class.create(pimcore.document.editable, {
             var templateEl = document.getElementById(templateId);
             if(templateEl) {
                 if(typeof editablesInBox[config['name']]['renderInDialogBox'] === "function") {
+                    if (editablesInBox[config['name']]['config']) {
+                        editablesInBox[config['name']]['config']['label'] = config['label'] ?? config['name'];
+                    }
                     return {
                         xtype: 'container',
                         html: templateEl.innerHTML
@@ -943,9 +946,17 @@ pimcore.document.editables.areablock = Class.create(pimcore.document.editable, {
                 manageHeight: false,
                 items: this.buildEditableDialogLayout(config['items'], editablesInBox, nextLevel)
             };
-
-            if(config['title']) {
-                container['title'] = config['title'];
+            let allowedConfigElements = [
+                'layout',
+                'flex',
+                'defaults',
+                'title'
+            ];
+            for (let i in allowedConfigElements) {
+                let cfgElement = allowedConfigElements[i];
+                if(config[cfgElement]) {
+                    container[cfgElement] = config[cfgElement];
+                }
             }
 
             return container;
