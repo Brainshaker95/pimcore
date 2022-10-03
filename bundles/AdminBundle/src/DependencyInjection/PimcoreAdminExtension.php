@@ -49,6 +49,7 @@ final class PimcoreAdminExtension extends Extension
         $loader->load('security_services.yaml');
         $loader->load('security_abstract_services.yaml');
         $loader->load('event_listeners.yaml');
+        $loader->load('l10n.yaml');
         $loader->load('serializer.yaml');
         $loader->load('export.yaml');
         $loader->load('aliases.yaml');
