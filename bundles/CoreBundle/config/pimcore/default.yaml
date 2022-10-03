@@ -54,19 +54,6 @@ framework:
             messenger.bus.pimcore-core:
         reset_on_message: true
 
-# Twig Configuration
-twig:
-    debug:            "%kernel.debug%"
-    strict_variables: "%kernel.debug%"
-    globals:
-        # avoid fetching and using services from templates if possible
-        # this is only here for compatibility/dev reasons and may be removed later
-        container: '@service_container'
-        pimcore_csrf: '@Pimcore\Bundle\AdminBundle\Security\CsrfProtectionHandler'
-        pimcore_csp: '@Pimcore\Bundle\AdminBundle\Security\ContentSecurityPolicyHandler'
-    paths:
-        '%kernel.project_dir%/templates': App
-
 # Doctrine Configuration
 doctrine:
     dbal:
@@ -99,14 +86,6 @@ cmf_routing:
 
 # Pimcore
 pimcore:
-    web_profiler:
-        toolbar:
-            excluded_routes:
-                - {path: '^/admin/asset/image-editor'}
-
-    security:
-        encoder_factories:
-            Pimcore\Bundle\AdminBundle\Security\User\User: pimcore_admin.security.password_encoder_factory
 
     bundles:
         search_paths:
@@ -207,17 +186,6 @@ pimcore:
     routing:
         direct_route_document_types: ['page', 'snippet', 'email', 'newsletter', 'printpage', 'printcontainer']
 
-    newsletter:
-        source_adapters:
-            defaultAdapter: pimcore.document.newsletter.factory.default
-            csvList: pimcore.document.newsletter.factory.csv
-            reportAdapter: pimcore.document.newsletter.factory.report
-
-    custom_report:
-        adapters:
-            sql: pimcore.custom_report.adapter.factory.sql
-            analytics: pimcore.custom_report.adapter.factory.analytics
-
     targeting:
         data_providers:
             device: Pimcore\Targeting\DataProvider\Device
@@ -248,31 +216,9 @@ pimcore:
         profiler:
             routes:
                 - { path: ^/_(profiler|wdt)(/.*)?$ }
-        admin:
-            routes:
-                - { path: ^/admin(/.*)?$ }
-                - { route: ^pimcore_admin_ }
         plugin:
             routes:
                 - { path: ^/plugin(/.*)?$ }
-    admin:
-        session:
-            attribute_bags:
-                - pimcore_admin
-                - pimcore_objects
-                - pimcore_copy
-                - pimcore_gridconfig
-                - pimcore_importconfig
-
-        # the following routes won't be double checked for authentication
-        # this usually applies to login routes
-        unauthenticated_routes:
-            - { route: pimcore_settings_display_custom_logo }
-            - { route: pimcore_admin_login }
-            - { route: pimcore_admin_webdav }
-
-        translations:
-            path: "@PimcoreCoreBundle/translations"
 
     sitemaps:
         generators:
