@@ -1,0 +1,2 @@
+imports:
+    - { resource: two_factor_authentication.yaml }
