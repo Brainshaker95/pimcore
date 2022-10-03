@@ -84,4 +84,3 @@ services:
 
     Twig\Extra\String\StringExtension: ~
 
-    Pimcore\Twig\Extension\AdminExtension: ~
